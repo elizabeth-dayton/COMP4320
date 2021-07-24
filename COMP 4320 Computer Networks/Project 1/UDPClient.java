@@ -5,7 +5,6 @@ import java.util.*;
 class UDPClient {
 	public static void main(String args[]) throws Exception {
 
-		//Reads in the keyboard stream by bytes and converts them into ASCII.
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = null;
@@ -39,18 +38,15 @@ class UDPClient {
 		String sentence;
 		String[] request;
 		do{
-			System.out.println("Type your HTTP Request and press Enter: ");
+			System.out.println("Type your HTTP GET Request and press Enter: ");
 			sentence = inFromUser.readLine();
 			request = sentence.split("[ ]");
 		}while(request.length != 3);
 
 		File file = new File(System.getProperty("user.dir"), request[1]);
 
-		//sending the data to the server.
 		sendData = sentence.getBytes();
 
-		//before we do anything with the packet, we need to send the data through our gremlin function
-		//to potentially damage it
 		gremlinFunction(sendData, probabilityOfDamage);
 
 		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, serverPortNumber);
@@ -67,13 +63,12 @@ class UDPClient {
 		try{
 		clientSocket.receive(receivePacket);
 		} catch(SocketTimeoutException e){
-			System.out.println("Too much time has gone by, connection is closed.");
+			System.out.println("Connection has timed out.");
 			clientSocket.close();
 		}
 		
 		if(!clientSocket.isClosed()){			
 		
-
 		String receivedPacketData = new String(receivePacket.getData());
 		System.out.print(receivedPacketData);
 		String[] receivedPacketHeaderData = receivedPacketData.split("[ ]");
@@ -82,7 +77,6 @@ class UDPClient {
 
 		if(receivedPacketHeaderData.length > 11){
 
-			//Receiving the header information
 			int indexOfcrlf = 0;
 	
 			for(int i = 0; i < 6; i++){
@@ -104,10 +98,9 @@ class UDPClient {
 				}
 
 				System.out.println(receivedPacketData);
-				//clear the received data
+
 				receiveData = emptyData.clone();				
 
-				//eos - end of stream, which indicates the first occurrence of an null byte 
 				eos = receivedPacketData.indexOf(0);
 				fileData = fileData + receivedPacketData;
 			}
@@ -123,7 +116,7 @@ class UDPClient {
 
 	/**
 	 * @param probability
-	 * @return Datagrampacket to be sent to server
+	 * @return a packet that may or may not have errors
 	 */
 	public static byte[] gremlinFunction(byte[] sendData, double probability) {
 
@@ -189,7 +182,7 @@ class UDPClient {
 
 	/**
 	 * @param packetData
-	 * @return int
+	 * @return the checksum value for the packet
 	 */
 	public static int checksumCalc(byte[] packetData){
 

@@ -18,34 +18,29 @@ class UDPServer {
 		HTTPHeader header = null;
 		final String ERRORFILE = "error.html";
 		byte[] receiveData = new byte[BUFFER_AMT];
-		byte[] emptyDataSet = new byte[BUFFER_AMT]; //used to reset the incoming data.
+		byte[] emptyDataSet = new byte[BUFFER_AMT]; 
 		byte[] sendData  = new byte[BUFFER_AMT];
 		int sequenceNum = 1;
 		int checksum;
 		
 		
 		while(true) {
-			//Receiving packet from client
+			
 			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 			serverSocket.receive(receivePacket);
-			System.out.println(receivePacket.getData());
 			
-			//extracting data from the packet
 			String sentence = new String(receivePacket.getData());
 			checksum = checksumCalc(receiveData);
 
-			//resetting the receive Data variable
 			receiveData = null;
 			receiveData = emptyDataSet.clone();
 
-			//splitting the request into separate parts to check if it is valid.
 			String[] request = sentence.split("[ ]");
 			
 			boolean fileExist;
 			boolean methodTokenValid;
 			String htmlDocumentBuffer = readFile(ERRORFILE);
 
-			//proper length now, need to check  if each element is authentic
 			methodTokenValid = isMethodTokenValid(request[0]);
 			fileExist = checkFileExistence(request[1]);
 		
@@ -90,23 +85,11 @@ class UDPServer {
 	}
 
 	/**
-	 * @param fileNameAndPath
-	 * @return true if the file exists false otherwise
-	 */
-	private  static boolean checkFileExistence(String fileNameAndPath){
-		if(fileNameAndPath == null){
-			return false;
-		}
-		File file = new File(System.getProperty("user.dir"), fileNameAndPath);
-		return file.getAbsoluteFile().exists();
-	}
-
-	/**
 	 * @param requestMethodToken
-	 * @return true if the request has a valid method token such as GET
+	 * @return checks to make sure the token is GET
 	 */
 	private  static boolean isMethodTokenValid(String requestMethodToken){
-		//Kept this way to be able to check for more tokens.
+		
 		String[] MethodTokenList = {"GET"};
 		for(String methodToken : MethodTokenList){
 			if(requestMethodToken.toUpperCase().equalsIgnoreCase(methodToken)){
@@ -118,7 +101,19 @@ class UDPServer {
 
 	/**
 	 * @param fileName
-	 * @return Content length in the number of bytes the file has
+	 * @return returns true if the file exists
+	 */
+	private  static boolean checkFileExistence(String fileName){
+		if(fileNameAndPath == null){
+			return false;
+		}
+		File file = new File(System.getProperty("user.dir"), fileName);
+		return file.getAbsoluteFile().exists();
+	}
+
+	/**
+	 * @param fileName
+	 * @return length of the file in bytes
 	 */
 	private static int contentLengthCalculator(String fileName){
 		if(fileName == null){
@@ -135,10 +130,27 @@ class UDPServer {
 		return encoded.length;
 
 	}
+
+	/**
+	 * @param fileName
+	 * @return generates the cotent type for the HTTPHeader
+	 */
+	public static String MIMETypeGenerator(String fileName){
+		String mimeType="text/plain";
+		if (fileName.endsWith(".html") || fileName.endsWith(".htm"))
+			mimeType="text/html";
+		else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
+			mimeType="image/jpeg";
+		else if (fileName.endsWith(".gif"))
+			mimeType="image/gif";
+		else if (fileName.endsWith(".class"))
+			mimeType="application/octet-stream";
+		return mimeType;
+	}
 	
 	/**
 	 * @param fileName
-	 * @return String of the file in ASCII encoding
+	 * @return reading the file contents
 	 */
 	private static String readFile(String fileName) throws IOException{
 		if(fileName == null){
@@ -153,25 +165,8 @@ class UDPServer {
 	}
 
 	/**
-	 * @param fileName
-	 * @return Content type
-	 */
-	public static String MIMETypeGenerator(String fileName){
-		String mimeType="text/plain";
-		if (fileName.endsWith(".html") || fileName.endsWith(".htm"))
-			mimeType="text/html";
-		else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
-			mimeType="image/jpeg";
-		else if (fileName.endsWith(".gif"))
-			mimeType="image/gif";
-		else if (fileName.endsWith(".class"))
-			mimeType="application/octet-stream";
-		return mimeType;
-	}
-
-	/**
 	 * @param packetData
-	 * @return int
+	 * @return the checksum value
 	 */
 	public static int checksumCalc(byte[] packetData){
 

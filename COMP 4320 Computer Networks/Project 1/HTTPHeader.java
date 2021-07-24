@@ -28,9 +28,7 @@ public class HTTPHeader {
 			return "Invalid Status Code";
 		}
 	}
-	
-
-	
+		
 	public int getmStatusCode() {
 		return mStatusCode;
 	}
