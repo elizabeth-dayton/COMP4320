@@ -39,13 +39,12 @@ class UDPClient {
 		String sentence;
 		String[] request;
 		do{
-			System.out.print("Type your HTTP Request and press Enter: ");
-			sentence = "GET TestFile.html HTTP/1.0";
+			System.out.println("Type your HTTP Request and press Enter: ");
+			sentence = inFromUser.readLine();
 			request = sentence.split("[ ]");
 		}while(request.length != 3);
 
-		System.out.print("This is the request" + request);
-		File file = new File(System.getProperty("user.dir"), "TestFile.html");
+		File file = new File(System.getProperty("user.dir"), request[1]);
 
 		//sending the data to the server.
 		sendData = sentence.getBytes();
@@ -113,20 +112,7 @@ class UDPClient {
 				fileData = fileData + receivedPacketData;
 			}
 			clientSocket.close();
-			Writer writer = null;
-			try {
-				fileData = fileData.trim();
-				writer = new BufferedWriter(new OutputStreamWriter(	new FileOutputStream(file), "UTF-8"));
-				writer.write(fileData);
-				writer.close();
-
-			} catch (IOException ex) {
-			} finally {
-				try {
-					writer.close();
-				} catch (Exception ex) {
-				}
-			}
+			
 		} else {
 			file = null;
 			System.out.println("Invalid response from Server.");

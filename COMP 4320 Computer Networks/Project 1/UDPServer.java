@@ -44,28 +44,22 @@ class UDPServer {
 			boolean fileExist;
 			boolean methodTokenValid;
 			String htmlDocumentBuffer = readFile(ERRORFILE);
-			
-			//checking if the response is valid and constructing a header in response to the invalid request
-			if(request.length !=3){
-				//error not a proper length of a request
-				//send 400 as a status code
+
+			//proper length now, need to check  if each element is authentic
+			methodTokenValid = isMethodTokenValid(request[0]);
+			fileExist = checkFileExistence(request[1]);
+		
+			if (methodTokenValid && fileExist){
+				header = new HTTPHeader(Integer.toString(contentLengthCalculator(request[1])), 200, MIMETypeGenerator(request[1]), sequenceNum, checksum);
+				htmlDocumentBuffer = readFile(request[1]);
+			} 
+			else if(methodTokenValid && !fileExist){
+				header = new HTTPHeader(Integer.toString(contentLengthCalculator(ERRORFILE)), 404, MIMETypeGenerator(ERRORFILE), sequenceNum, checksum);
+			}
+			else if(!methodTokenValid){
 				header = new HTTPHeader(Integer.toString(contentLengthCalculator(ERRORFILE)), 400, MIMETypeGenerator(ERRORFILE), sequenceNum, checksum);
 			}
-			else {
-				//proper length now, need to check  if each element is authentic
-				methodTokenValid = isMethodTokenValid(request[0]);
-				fileExist = checkFileExistence(request[1]);
-				if (methodTokenValid && fileExist){
-					header = new HTTPHeader(Integer.toString(contentLengthCalculator(request[1])), 200, MIMETypeGenerator(request[1]), sequenceNum, checksum);
-					htmlDocumentBuffer = readFile(request[1]);
-				} 
-				if(methodTokenValid && !fileExist){
-					header = new HTTPHeader(Integer.toString(contentLengthCalculator(ERRORFILE)), 404, MIMETypeGenerator(ERRORFILE), sequenceNum, checksum);
-				}
-				if(!methodTokenValid){
-					header = new HTTPHeader(Integer.toString(contentLengthCalculator(ERRORFILE)), 400, MIMETypeGenerator(ERRORFILE), sequenceNum, checksum);
-				}
-			} 
+			
 			sequenceNum += 1;
 			InetAddress IPAddress = receivePacket.getAddress();
 			int port = receivePacket.getPort();
@@ -79,7 +73,7 @@ class UDPServer {
 			int start = 0;
 			int end = 1024;
 			for(int i = 0; i < (double)headerAndDataByteArray.length/1024 ; i++){
-				System.out.println(i);
+
 				byte[] dataInformation = Arrays.copyOfRange(headerAndDataByteArray, start, end);
 				System.out.println(new String(dataInformation));
 				sendData = dataInformation;
@@ -88,8 +82,7 @@ class UDPServer {
 				start = end;
 				end = end + 1024;
 			}
-			sendData = new byte[1];
-			sendData[0] = 0;
+			
 			sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
 			serverSocket.send(sendPacket);
 
@@ -98,14 +91,14 @@ class UDPServer {
 
 	/**
 	 * @param fileNameAndPath
-	 * @return true if the file exist false otherwise
+	 * @return true if the file exists false otherwise
 	 */
 	private  static boolean checkFileExistence(String fileNameAndPath){
 		if(fileNameAndPath == null){
 			return false;
 		}
-		File file = new File(System.getProperty("user.dir") + fileNameAndPath);
-		return file.exists();
+		File file = new File(System.getProperty("user.dir"), fileNameAndPath);
+		return file.getAbsoluteFile().exists();
 	}
 
 	/**
@@ -131,7 +124,7 @@ class UDPServer {
 		if(fileName == null){
 			return 0;
 		}		
-		File file = new File(System.getProperty("user.dir") + "/www/"+fileName);
+		File file = new File(System.getProperty("user.dir"), fileName);
 		byte[] encoded = null;  
 		try{
 			encoded = Files.readAllBytes(file.toPath());
@@ -147,23 +140,16 @@ class UDPServer {
 	 * @param fileName
 	 * @return String of the file in ASCII encoding
 	 */
-	private static String readFile(String fileName){
+	private static String readFile(String fileName) throws IOException{
 		if(fileName == null){
 			return "";
 		}		
-		File file = new File(System.getProperty("user.dir") + "/www/"+fileName);
+		File file = new File(System.getProperty("user.dir"), fileName);
 		byte[] encoded = null;  
-		try{
-			encoded = Files.readAllBytes(file.toPath());
+		
+		encoded = Files.readAllBytes(file.toPath());
 
-		} catch(IOException e){
-			return "";
-		}
-		try{
-			return new String(encoded,"UTF-8");
-		} catch(UnsupportedEncodingException e){
-			return "UTF IS NOT SUPPORTED";
-		}
+		return new String(encoded,"UTF-8");
 	}
 
 	/**
