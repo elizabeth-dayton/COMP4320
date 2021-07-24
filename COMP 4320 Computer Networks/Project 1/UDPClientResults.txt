@@ -1,0 +1,20 @@
+Script started on Fri Jul 23 18:41:07 2021
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+[?1034hbash-3.2$ /usr/bin/python3 "/Users/elizabethdayton/Documents/LeetCode/Easy Problems/besttimetobuyandsellstock.py"[C[C[C[C[C[C[C[C[C[C[Kjava UDPClient.java
+Enter the server IP address: 192.168.0.23
+Enter the server port number: 80
+Enter the probability of packet being damaged:0.5
+Type your HTTP Request and press Enter:
+GET TestFile.html HTTP/1.0
+Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: Index 583 out of bounds for length 26
+	at UDPClient.gremlinFunction(UDPClient.java:195)
+	at UDPClient.main(UDPClient.java:54)
+bash-3.2$ java UDPClient.java[C[C[C[C[C[C[C[C[C[C[Kend script
+bash: end: command not found
+bash-3.2$ exot[K[Kit
+exit
+
+Script done on Fri Jul 23 18:45:10 2021
